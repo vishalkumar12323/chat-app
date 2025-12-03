@@ -5,6 +5,8 @@ const { Server } = require('socket.io');
 const sequelize = require('./src/config/database');
 require('dotenv').config();
 
+
+
 const authRoutes = require('./src/routes/authRoutes');
 const channelRoutes = require('./src/routes/channelRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
@@ -15,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: process.env.ALLOWED_ORIGIN,
         methods: ["GET", "POST"]
     }
 });

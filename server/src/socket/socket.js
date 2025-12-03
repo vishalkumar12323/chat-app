@@ -1,6 +1,7 @@
 const { User, Message } = require('../models');
 const jwt = require('jsonwebtoken');
 
+
 const socketHandler = (io) => {
     // authentication
     io.use(async (socket, next) => {
@@ -9,7 +10,7 @@ const socketHandler = (io) => {
             if (!token) {
                 return next(new Error('Authentication error'));
             }
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             socket.user = await User.findByPk(decoded.id);
             next();
         } catch (err) {

@@ -3,15 +3,15 @@ const Channel = require('./Channel');
 const Message = require('./Message');
 const ChannelMember = require('./ChannelMember');
 
-// User - Message (One-to-Many)
+// User - Message
 User.hasMany(Message, { foreignKey: 'user_id' });
 Message.belongsTo(User, { foreignKey: 'user_id' });
 
-// Channel - Message (One-to-Many)
+// Channel - Message
 Channel.hasMany(Message, { foreignKey: 'channel_id' });
 Message.belongsTo(Channel, { foreignKey: 'channel_id' });
 
-// User - Message (Direct Messages)
+// User - Message
 User.hasMany(Message, { foreignKey: 'recipient_id', as: 'ReceivedMessages' });
 Message.belongsTo(User, { foreignKey: 'recipient_id', as: 'Recipient' });
 

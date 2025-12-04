@@ -14,7 +14,6 @@ function App() {
   const { checkAuth } = useAuthStore();
 
 
-  console.log("api url ", import.meta.env.VITE_API_URL);
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);

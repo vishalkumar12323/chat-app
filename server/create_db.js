@@ -6,6 +6,12 @@ const client = new Client({
     password: process.env.DB_PASSWORD || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     database: 'postgres', // Connect to default postgres db
+    ssl: {
+        rejectUnauthorized: false,
+    },
+    dialectOptions: {
+        sslmode: 'require',
+    },
 });
 
 async function createDatabase() {

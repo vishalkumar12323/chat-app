@@ -1,8 +1,9 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+import { Request, Response } from "express"
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { User } from '../models';
 
-const register = async (req, res) => {
+const register = async (req: Request, res: Response) => {
     try {
         const { username, email, password } = req.body;
 
@@ -20,7 +21,7 @@ const register = async (req, res) => {
             password_hash,
         });
 
-        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, { expiresIn: '1d' });
 
         res.status(201).json({
             token,
@@ -37,7 +38,7 @@ const register = async (req, res) => {
     }
 };
 
-const login = async (req, res) => {
+const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
@@ -51,7 +52,7 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: '1d' });
 
         res.json({
             token,
@@ -68,7 +69,7 @@ const login = async (req, res) => {
     }
 };
 
-const getMe = async (req, res) => {
+const getMe = async (req: Request, res: Response) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['password_hash'] },
@@ -80,8 +81,4 @@ const getMe = async (req, res) => {
     }
 };
 
-module.exports = {
-    register,
-    login,
-    getMe,
-};
+export { register, login, getMe };

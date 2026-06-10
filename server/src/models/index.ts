@@ -1,7 +1,7 @@
-const User = require('./User');
-const Channel = require('./Channel');
-const Message = require('./Message');
-const ChannelMember = require('./ChannelMember');
+import User from './User';
+import Channel from './Channel';
+import Message from './Message';
+import ChannelMember from './ChannelMember';
 
 // User - Message
 User.hasMany(Message, { foreignKey: 'user_id' });
@@ -22,7 +22,7 @@ Channel.belongsToMany(User, { through: ChannelMember, foreignKey: 'channel_id' }
 // Channel - User (Creator)
 Channel.belongsTo(User, { as: 'Creator', foreignKey: 'created_by' });
 
-module.exports = {
+export {
     User,
     Channel,
     Message,

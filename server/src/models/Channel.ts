@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database';
 
 const Channel = sequelize.define('channels', {
     id: {
@@ -23,4 +23,4 @@ const Channel = sequelize.define('channels', {
     timestamps: true,
 });
 
-module.exports = Channel;
+export default Channel;

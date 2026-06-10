@@ -1,11 +1,10 @@
 import express from 'express';
 const router = express.Router();
-import { getMessages, getDirectMessages } from '../controllers/messageController.js';
+import { getUsers } from '../controllers/userController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 router.use(authMiddleware);
 
-router.get('/direct/:userId', getDirectMessages);
-router.get('/:channelId', getMessages);
+router.get('/', getUsers);
 
 export default router;

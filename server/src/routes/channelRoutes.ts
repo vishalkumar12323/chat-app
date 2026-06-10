@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { createChannel, getChannels, joinChannel, getMyChannels } = require('../controllers/channelController');
-const authMiddleware = require('../middleware/authMiddleware');
+import { createChannel, getChannels, joinChannel, getMyChannels } from '../controllers/channelController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 router.use(authMiddleware); // Protect all channel routes
 
@@ -10,4 +10,4 @@ router.get('/', getChannels);
 router.post('/:id/join', joinChannel);
 router.get('/me', getMyChannels);
 
-module.exports = router;
+export default router;

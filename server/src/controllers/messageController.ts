@@ -1,8 +1,9 @@
-const { Message, User } = require('../models');
+import { Message, User } from '../models';
+import { Request, Response } from "express"
 
-const { Op } = require('sequelize');
+import { Op } from 'sequelize';
 
-const getMessages = async (req, res) => {
+const getMessages = async (req: Request, res: Response) => {
     try {
         const { channelId } = req.params;
         const { page = 1, limit = 50 } = req.query;
@@ -33,7 +34,7 @@ const getMessages = async (req, res) => {
     }
 };
 
-const getDirectMessages = async (req, res) => {
+const getDirectMessages = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params; // The other user
         const currentUserId = req.user.id;
@@ -70,7 +71,7 @@ const getDirectMessages = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     getMessages,
     getDirectMessages,
 };

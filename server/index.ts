@@ -9,11 +9,11 @@ dotenv.config();
 
 
 
-import authRoutes from './src/routes/authRoutes';
-import channelRoutes from './src/routes/channelRoutes';
-import messageRoutes from './src/routes/messageRoutes';
-import userRoutes from './src/routes/userRoutes';
-import socketHandler from './src/socket/socket';
+import authRoutes from './src/routes/authRoutes.js';
+import channelRoutes from './src/routes/channelRoutes.js';
+import messageRoutes from './src/routes/messageRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import socketHandler from './src/socket/socket.js';
 
 const app = express();
 const server = http.createServer(app);

@@ -1,7 +1,7 @@
-import User from './User';
-import Channel from './Channel';
-import Message from './Message';
-import ChannelMember from './ChannelMember';
+import User from './User.js';
+import Channel from './Channel.js';
+import Message from './Message.js';
+import ChannelMember from './ChannelMember.js';
 
 // User - Message
 User.hasMany(Message, { foreignKey: 'user_id' });

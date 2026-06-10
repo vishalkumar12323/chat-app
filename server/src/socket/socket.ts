@@ -1,7 +1,11 @@
-const { User, Message } = require("../models");
-const jwt = require("jsonwebtoken");
+import { User, Message } from "../models";
+import jwt from "jsonwebtoken";
+import { type Server } from "socket.io";
+import * as dotenv from "dotenv";
 
-const socketHandler = (io) => {
+dotenv.config();
+
+const socketHandler = (io: Server) => {
   // authentication
   io.use(async (socket, next) => {
     try {
@@ -9,7 +13,7 @@ const socketHandler = (io) => {
       if (!token) {
         return next(new Error("Authentication error"));
       }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
       socket.user = await User.findByPk(decoded.id);
       next();
     } catch (err) {
@@ -110,4 +114,4 @@ const socketHandler = (io) => {
   });
 };
 
-module.exports = socketHandler;
+export default socketHandler;

@@ -1,6 +1,7 @@
-const { Channel, User, ChannelMember } = require('../models');
+import { Channel, User, ChannelMember } from '../models';
+import { Request, Response } from "express"
 
-const createChannel = async (req, res) => {
+const createChannel = async (req: Request, res: Response) => {
     try {
         const { name, description } = req.body;
         const userId = req.user.id;
@@ -30,7 +31,7 @@ const createChannel = async (req, res) => {
     }
 };
 
-const getChannels = async (_req, res) => {
+const getChannels = async (_req: Request, res: Response) => {
     try {
         const channels = await Channel.findAll({
             include: [
@@ -48,7 +49,7 @@ const getChannels = async (_req, res) => {
     }
 };
 
-const joinChannel = async (req, res) => {
+const joinChannel = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
@@ -79,7 +80,7 @@ const joinChannel = async (req, res) => {
     }
 };
 
-const getMyChannels = async (req, res) => {
+const getMyChannels = async (req: Request, res: Response) => {
     try {
         const userId = req.user.id;
         const user = await User.findByPk(userId, {
@@ -97,7 +98,7 @@ const getMyChannels = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     createChannel,
     getChannels,
     joinChannel,

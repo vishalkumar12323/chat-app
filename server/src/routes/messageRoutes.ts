@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import { getMessages, getDirectMessages } from '../controllers/messageController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+import { getMessages, getDirectMessages } from '../controllers/messageController';
+import authMiddleware from '../middleware/authMiddleware';
 
 router.use(authMiddleware);
 

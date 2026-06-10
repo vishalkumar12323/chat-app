@@ -2,18 +2,18 @@ import express from 'express';
 import http from "node:http"
 import cors from 'cors';
 import { Server } from 'socket.io';
-import sequelize from './src/config/database.js';
+import sequelize from './config/database';
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
 
 
-import authRoutes from './src/routes/authRoutes.js';
-import channelRoutes from './src/routes/channelRoutes.js';
-import messageRoutes from './src/routes/messageRoutes.js';
-import userRoutes from './src/routes/userRoutes.js';
-import socketHandler from './src/socket/socket.js';
+import authRoutes from './routes/authRoutes';
+import channelRoutes from './routes/channelRoutes';
+import messageRoutes from './routes/messageRoutes';
+import userRoutes from './routes/userRoutes';
+import socketHandler from './socket/socket';
 
 const app = express();
 const server = http.createServer(app);

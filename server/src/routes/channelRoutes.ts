@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import { createChannel, getChannels, joinChannel, getMyChannels } from '../controllers/channelController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+import { createChannel, getChannels, joinChannel, getMyChannels } from '../controllers/channelController';
+import authMiddleware from '../middleware/authMiddleware';
 
 router.use(authMiddleware); // Protect all channel routes
 

@@ -1,22 +1,28 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 
-const Login = () => {
-    const [formData, setFormData] = useState({
+interface LoginFormData {
+    email: string;
+    password: string;
+}
+
+const Login: React.FC = () => {
+    const [formData, setFormData] = useState<LoginFormData>({
         email: "",
         password: ""
-    })
+    });
     const { login, isLoading, error } = useAuthStore();
     const navigate = useNavigate();
 
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value })
-    }
+        setFormData({ ...formData, [name]: value });
+    };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         try {
             await login(formData.email, formData.password);

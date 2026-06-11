@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { UIEvent } from 'react';
 import useChatStore from '../store/chatStore';
 import { format } from 'date-fns';
 
-const MessageList = () => {
+const MessageList: React.FC = () => {
     const { messages, isLoading, currentChannel, selectedUser, loadMoreMessages, hasMoreMessages } = useChatStore();
-    const bottomRef = useRef(null);
-    const topRef = useRef(null);
-    const scrollContainerRef = useRef(null);
-    const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const topRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true);
 
     // Scroll to bottom on new messages
     useEffect(() => {
@@ -19,11 +20,11 @@ const MessageList = () => {
     // Infinite scroll observer
     useEffect(() => {
         const observer = new IntersectionObserver(
-            (entries) => {
+            (entries: IntersectionObserverEntry[]) => {
                 if (entries[0].isIntersecting && hasMoreMessages && !isLoading) {
                     // Save scroll position before loading more
                     const scrollContainer = scrollContainerRef.current;
-                    const previousScrollHeight = scrollContainer.scrollHeight;
+                    const previousScrollHeight = scrollContainer?.scrollHeight ?? 0;
 
                     loadMoreMessages().then(() => {
                         // Restore scroll position
@@ -43,7 +44,7 @@ const MessageList = () => {
         return () => observer.disconnect();
     }, [hasMoreMessages, isLoading, loadMoreMessages]);
 
-    const handleScroll = () => {
+    const handleScroll = (_e: UIEvent<HTMLDivElement>): void => {
         const container = scrollContainerRef.current;
         if (container) {
             const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;

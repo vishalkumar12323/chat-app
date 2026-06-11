@@ -1,29 +1,37 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 
-const Register = () => {
-    const [formData, setFormData] = useState({
+interface RegisterFormData {
+    username: string;
+    email: string;
+    password: string;
+}
+
+const Register: React.FC = () => {
+    const [formData, setFormData] = useState<RegisterFormData>({
         username: "",
         email: "",
         password: ""
-    })
+    });
     const { register, isLoading, error } = useAuthStore();
     const navigate = useNavigate();
 
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-    }
-    const handleSubmit = async (e) => {
+    };
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         try {
             await register(formData.username, formData.email, formData.password);
             navigate('/chat');
         } catch (err) {
             // Error handled in store
-            console.log("user register err: ", err)
+            console.log("user register err: ", err);
         }
     };
 

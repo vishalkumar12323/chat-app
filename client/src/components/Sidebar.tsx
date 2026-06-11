@@ -1,30 +1,37 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import useChatStore from '../store/chatStore';
 import useAuthStore from '../store/authStore';
 import { LogOut, Plus, Hash } from 'lucide-react';
 
-const Sidebar = () => {
+interface NewChannelData {
+    name: string;
+    description: string;
+}
+
+const Sidebar: React.FC = () => {
     const { channels, fetchChannels, selectChannel, currentChannel, createChannel } = useChatStore();
     const { user, logout } = useAuthStore();
-    const [isCreating, setIsCreating] = useState(false);
-    const [newChannelData, setNewChannelData] = useState({
+    const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [newChannelData, setNewChannelData] = useState<NewChannelData>({
         name: "",
         description: ""
-    })
+    });
 
     useEffect(() => {
         fetchChannels();
     }, [fetchChannels]);
 
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
         setNewChannelData((prev) => ({
             ...prev,
             [name]: value
-        }))
-    }
-    const handleCreateChannel = async (e) => {
+        }));
+    };
+
+    const handleCreateChannel = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         if (!newChannelData.name) return;
         try {
@@ -34,7 +41,7 @@ const Sidebar = () => {
                 description: ""
             });
             setIsCreating(false);
-        } catch (error) {
+        } catch {
             alert('Failed to create channel');
         }
     };

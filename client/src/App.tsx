@@ -4,15 +4,19 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Chat from './pages/Chat';
 import useAuthStore from './store/authStore';
+import type { ReactNode } from 'react';
 
-const PrivateRoute = ({ children }) => {
+interface PrivateRouteProps {
+  children: ReactNode;
+}
+
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 function App() {
   const { checkAuth } = useAuthStore();
-
 
   useEffect(() => {
     checkAuth();

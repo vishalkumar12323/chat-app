@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import type { FormEvent, ChangeEvent } from 'react';
 import useChatStore from '../store/chatStore';
 import { Send } from 'lucide-react';
 
-const MessageInput = () => {
-    const [content, setContent] = useState('');
+const MessageInput: React.FC = () => {
+    const [content, setContent] = useState<string>('');
     const { sendMessage, currentChannel, selectedUser } = useChatStore();
 
-    const handleSend = (e) => {
+    const handleSend = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         if (!content.trim() || (!currentChannel && !selectedUser)) return;
 
@@ -14,8 +15,8 @@ const MessageInput = () => {
         setContent('');
     };
 
-    const isDisabled = !currentChannel && !selectedUser;
-    const placeholder = currentChannel
+    const isDisabled: boolean = !currentChannel && !selectedUser;
+    const placeholder: string = currentChannel
         ? `Message #${currentChannel.name}`
         : selectedUser
             ? `Message @${selectedUser.username}`
@@ -29,7 +30,7 @@ const MessageInput = () => {
                     className="flex-1 bg-transparent outline-none"
                     placeholder={placeholder}
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setContent(e.target.value)}
                     disabled={isDisabled}
                 />
                 <button

@@ -1,22 +1,23 @@
 import { create } from "zustand";
 import api from "../services/api";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import type { ChatState, Channel, User, Message } from "../types";
 
-const useChatStore = create((set, get) => ({
+const useChatStore = create<ChatState>((set, get) => ({
   socket: null,
   channels: [],
   currentChannel: null,
   selectedUser: null,
   messages: [],
   users: [],
-  onlineUsers: new Set(),
+  onlineUsers: new Set<number>(),
   isLoading: false,
   hasMoreMessages: true,
   page: 1,
 
-  connectSocket: (token) => {
+  connectSocket: (token: string): void => {
     if (get().socket) return;
-    const socket = io(import.meta.env.VITE_SOCKET_IO_URL, {
+    const socket: Socket = io(import.meta.env.VITE_SOCKET_IO_URL, {
       auth: { token },
     });
 
@@ -24,14 +25,14 @@ const useChatStore = create((set, get) => ({
       console.log("Socket connected");
     });
 
-    socket.on("new_message", (message) => {
+    socket.on("new_message", (message: Message) => {
       const { currentChannel, messages } = get();
       if (currentChannel && message.channel_id === currentChannel.id) {
         set({ messages: [...messages, message] });
       }
     });
 
-    socket.on("new_direct_message", (message) => {
+    socket.on("new_direct_message", (message: Message) => {
       const { selectedUser, messages } = get();
       // Check if the message belongs to the currently selected conversation
       // Either sent by the selected user OR sent by me TO the selected user
@@ -45,7 +46,7 @@ const useChatStore = create((set, get) => ({
       }
     });
 
-    socket.on("user_status", ({ userId, is_online }) => {
+    socket.on("user_status", ({ userId, is_online }: { userId: number; is_online: boolean }) => {
       set((state) => {
         const newOnlineUsers = new Set(state.onlineUsers);
         if (is_online) {
@@ -60,7 +61,7 @@ const useChatStore = create((set, get) => ({
     set({ socket });
   },
 
-  disconnectSocket: () => {
+  disconnectSocket: (): void => {
     const { socket } = get();
     if (socket) {
       socket.disconnect();
@@ -68,7 +69,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  fetchChannels: async () => {
+  fetchChannels: async (): Promise<void> => {
     try {
       const response = await api.get("/channels");
       set({ channels: response.data });
@@ -77,7 +78,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  createChannel: async (name, description) => {
+  createChannel: async (name: string, description: string): Promise<Channel> => {
     try {
       const response = await api.post("/channels", { name, description });
       set((state) => ({ channels: [...state.channels, response.data] }));
@@ -87,7 +88,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  joinChannel: async (channelId) => {
+  joinChannel: async (channelId: number): Promise<void> => {
     try {
       await api.post(`/channels/${channelId}/join`);
     } catch (error) {
@@ -95,7 +96,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  selectChannel: async (channel) => {
+  selectChannel: async (channel: Channel): Promise<void> => {
     set({
       currentChannel: channel,
       selectedUser: null,
@@ -110,7 +111,7 @@ const useChatStore = create((set, get) => ({
     await get().fetchMessages(channel.id, 1);
   },
 
-  selectUser: async (user) => {
+  selectUser: async (user: User): Promise<void> => {
     set({
       selectedUser: user,
       currentChannel: null,
@@ -121,13 +122,13 @@ const useChatStore = create((set, get) => ({
     await get().fetchDirectMessages(user.id, 1);
   },
 
-  fetchMessages: async (channelId, page = 1) => {
+  fetchMessages: async (channelId: number, page: number = 1): Promise<void> => {
     if (page === 1) set({ isLoading: true });
     try {
       const response = await api.get(
         `/messages/${channelId}?page=${page}&limit=50`
       );
-      const newMessages = response.data.messages;
+      const newMessages: Message[] = response.data.messages;
 
       set((state) => ({
         messages:
@@ -142,13 +143,13 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  fetchDirectMessages: async (userId, page = 1) => {
+  fetchDirectMessages: async (userId: number, page: number = 1): Promise<void> => {
     if (page === 1) set({ isLoading: true });
     try {
       const response = await api.get(
         `/messages/direct/${userId}?page=${page}&limit=50`
       );
-      const newMessages = response.data.messages;
+      const newMessages: Message[] = response.data.messages;
 
       set((state) => ({
         messages:
@@ -163,7 +164,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  loadMoreMessages: async () => {
+  loadMoreMessages: async (): Promise<void> => {
     const { currentChannel, selectedUser, page, hasMoreMessages, isLoading } =
       get();
     if ((!currentChannel && !selectedUser) || !hasMoreMessages || isLoading)
@@ -176,7 +177,7 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  sendMessage: (content) => {
+  sendMessage: (content: string): void => {
     const { socket, currentChannel, selectedUser } = get();
     if (socket) {
       if (currentChannel) {
@@ -190,17 +191,17 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  fetchUsers: async () => {
+  fetchUsers: async (): Promise<void> => {
     try {
       const response = await api.get("/users");
-      const users = response.data;
+      const users: User[] = response.data;
       // Only initialize onlineUsers if it's empty (first load)
       // Otherwise, let socket events manage the online status
       set((state) => {
         if (state.onlineUsers.size === 0) {
           // First load: use database status
-          const onlineUsers = new Set(
-            users.filter((u) => u.is_online).map((u) => u.id)
+          const onlineUsers = new Set<number>(
+            users.filter((u: User) => u.is_online).map((u: User) => u.id)
           );
           return { users, onlineUsers };
         } else {

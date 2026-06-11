@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import useChatStore from '../store/chatStore';
 import useAuthStore from "../store/authStore";
+import type { User } from '../types';
 
-const UserList = () => {
+const UserList: React.FC = () => {
     const { users, fetchUsers, onlineUsers, selectUser, selectedUser } = useChatStore();
     const { user } = useAuthStore();
 
@@ -17,8 +18,8 @@ const UserList = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-4">
                 <ul className="space-y-2">
-                    {users.map((u) => {
-                        const isOnline = onlineUsers.has(u.id) || u.is_online;
+                    {users.map((u: User) => {
+                        const isOnline: boolean = onlineUsers.has(u.id) || u.is_online;
 
                         if (u.id === user?.id) return null;
 

@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import { verifyToken } from "../utils/jwt"
 import { Request, Response, NextFunction } from "express"
 
 
@@ -11,8 +11,8 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        req.user = decoded;
+        const payload = verifyToken(token);
+        req.user = payload;
         next();
     } catch (error) {
         res.status(401).json({ message: 'Token is not valid' });

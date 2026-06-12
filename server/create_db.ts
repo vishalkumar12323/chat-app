@@ -13,9 +13,9 @@ const client = new Client({
 async function createDatabase() {
     try {
         await client.connect();
-        const res = await client.query(`SELECT 1 FROM pg_database WHERE datname = '${process.env.DB_NAME || 'slack_lite'}'`);
+        const res = await client.query(`SELECT 1 FROM pg_database WHERE datname = '${process.env.DB_NAME || 'chat_db'}'`);
         if (res.rowCount === 0) {
-            await client.query(`CREATE DATABASE "${process.env.DB_NAME || 'slack_lite'}"`);
+            await client.query(`CREATE DATABASE "${process.env.DB_NAME || 'chat_db'}"`);
             console.log('Database created successfully.');
         } else {
             console.log('Database already exists.');

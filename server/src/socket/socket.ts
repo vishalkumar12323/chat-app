@@ -1,5 +1,5 @@
 import { User, Message } from "../models";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../utils/jwt"
 import { type Server } from "socket.io";
 import * as dotenv from "dotenv";
 
@@ -13,8 +13,8 @@ const socketHandler = (io: Server) => {
       if (!token) {
         return next(new Error("Authentication error"));
       }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-      socket.user = await User.findByPk(decoded.id);
+      const payload = verifyToken(token);
+      socket.user = await User.findByPk(payload.userId);
       next();
     } catch (err) {
       next(new Error("Authentication error"));
@@ -26,10 +26,10 @@ const socketHandler = (io: Server) => {
 
     // Update user status to online
     await socket.user?.update({ is_online: true, last_seen: new Date() });
-    io.emit("user_status", { userId: socket.user.id, is_online: true });
+    io.emit("user_status", { userId: socket.user?.get().id, is_online: true });
 
     // Join user-specific room for DMs
-    socket.join(`user_${socket.user.id}`);
+    socket.join(`user_${socket.user?.get().id}`);
 
     // Join channels
     socket.on("join_channel", (channelId) => {
@@ -44,11 +44,11 @@ const socketHandler = (io: Server) => {
 
         const message = await Message.create({
           content,
-          user_id: socket.user.id,
+          user_id: socket.user?.get().id as string,
           channel_id: channelId,
         });
 
-        const fullMessage = await Message.findByPk(message.id, {
+        const fullMessage = await Message.findByPk(message.get().id, {
           include: [
             { model: User, attributes: ["id", "username", "avatar_url"] },
           ],
@@ -67,11 +67,11 @@ const socketHandler = (io: Server) => {
 
         const message = await Message.create({
           content,
-          user_id: socket.user.id,
+          user_id: socket.user?.get().id as string,
           recipient_id: recipientId,
         });
 
-        const fullMessage = await Message.findByPk(message.id, {
+        const fullMessage = await Message.findByPk(message.get().id, {
           include: [
             { model: User, attributes: ["id", "username", "avatar_url"] },
             {
@@ -85,7 +85,7 @@ const socketHandler = (io: Server) => {
         // Emit to recipient
         io.to(`user_${recipientId}`).emit("new_direct_message", fullMessage);
         // Emit to sender (so it appears in their chat immediately if they have multiple tabs open, or just consistency)
-        io.to(`user_${socket.user.id}`).emit("new_direct_message", fullMessage);
+        io.to(`user_${socket.user?.get().id}`).emit("new_direct_message", fullMessage);
       } catch (error) {
         console.error("Error sending direct message:", error);
       }
@@ -95,8 +95,8 @@ const socketHandler = (io: Server) => {
     socket.on("typing", (data) => {
       const { channelId, isTyping } = data;
       socket.to(`channel_${channelId}`).emit("user_typing", {
-        userId: socket.user.id,
-        username: socket.user.username,
+        userId: socket.user?.get().id,
+        username: socket.user?.get().username,
         isTyping,
         channelId,
       });
@@ -104,9 +104,9 @@ const socketHandler = (io: Server) => {
 
     socket.on("disconnect", async () => {
       // console.log(`User disconnected: ${socket.user.username}`);
-      await socket.user.update({ is_online: false, last_seen: new Date() });
+      await socket.user?.update({ is_online: false, last_seen: new Date() });
       io.emit("user_status", {
-        userId: socket.user.id,
+        userId: socket.user?.get().id,
         is_online: false,
         last_seen: new Date(),
       });

@@ -1,7 +1,16 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-const Channel = sequelize.define('channels', {
+export interface ChannelAttributes {
+    id: string;
+    name: string;
+    description?: string;
+    created_by: string;
+}
+
+interface ChannelCreationAttributes extends Optional<ChannelAttributes, 'id' | 'description'> {}
+
+const Channel = sequelize.define<Model<ChannelAttributes, ChannelCreationAttributes>>('channels', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -24,3 +33,4 @@ const Channel = sequelize.define('channels', {
 });
 
 export default Channel;
+

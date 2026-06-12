@@ -1,7 +1,17 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-const Message = sequelize.define('messages', {
+export interface MessageAttributes {
+    id: string;
+    content: string;
+    user_id: string;
+    channel_id?: string;
+    recipient_id?: string;
+}
+
+interface MessageCreationAttributes extends Optional<MessageAttributes, 'id' | 'channel_id' | 'recipient_id'> {}
+
+const Message = sequelize.define<Model<MessageAttributes, MessageCreationAttributes>>('messages', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -28,3 +38,4 @@ const Message = sequelize.define('messages', {
 });
 
 export default Message;
+

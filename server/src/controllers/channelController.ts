@@ -1,10 +1,11 @@
 import { Channel, User, ChannelMember } from '../models';
+import { ChannelAttributes } from '../models/Channel';
 import { Request, Response } from "express"
 
 const createChannel = async (req: Request, res: Response) => {
     try {
         const { name, description } = req.body;
-        const userId = req.user.id;
+        const userId = req.user?.userId;
 
         // Check if channel exists
         const existingChannel = await Channel.findOne({ where: { name } });
@@ -15,13 +16,15 @@ const createChannel = async (req: Request, res: Response) => {
         const newChannel = await Channel.create({
             name,
             description,
-            created_by: userId,
+            created_by: userId!,
         });
+
+        const channelAttrs = newChannel.get() as ChannelAttributes;
 
         // Add creator as member
         await ChannelMember.create({
-            user_id: userId,
-            channel_id: newChannel.id,
+            user_id: userId!,
+            channel_id: channelAttrs.id,
         });
 
         res.status(201).json(newChannel);
@@ -51,8 +54,8 @@ const getChannels = async (_req: Request, res: Response) => {
 
 const joinChannel = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
-        const userId = req.user.id;
+        const id = req.params.id as string;
+        const userId = req.user?.userId
 
         const channel = await Channel.findByPk(id);
         if (!channel) {
@@ -69,7 +72,7 @@ const joinChannel = async (req: Request, res: Response) => {
         }
 
         await ChannelMember.create({
-            user_id: userId,
+            user_id: userId!,
             channel_id: id,
         });
 
@@ -82,7 +85,7 @@ const joinChannel = async (req: Request, res: Response) => {
 
 const getMyChannels = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.userId;
         const user = await User.findByPk(userId, {
             include: [
                 {
@@ -91,7 +94,10 @@ const getMyChannels = async (req: Request, res: Response) => {
                 },
             ],
         });
-        res.json(user.Channels);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json((user.get() as any).Channels ?? []);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

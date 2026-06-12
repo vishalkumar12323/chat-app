@@ -6,8 +6,9 @@ import { Op } from 'sequelize';
 const getMessages = async (req: Request, res: Response) => {
     try {
         const { channelId } = req.params;
-        const { page = 1, limit = 50 } = req.query;
-        const offset = (page - 1) * limit;
+        const pageNum = Number(req.query.page) || 1;
+        const limitNum = Number(req.query.limit) || 50;
+        const offset = (pageNum - 1) * limitNum;
 
         const messages = await Message.findAndCountAll({
             where: { channel_id: channelId },
@@ -18,15 +19,15 @@ const getMessages = async (req: Request, res: Response) => {
                 },
             ],
             order: [['createdAt', 'DESC']],
-            limit: parseInt(limit),
-            offset: parseInt(offset),
+            limit: limitNum,
+            offset,
         });
 
         res.json({
             messages: messages.rows.reverse(),
             total: messages.count,
-            page: parseInt(page),
-            totalPages: Math.ceil(messages.count / limit),
+            page: pageNum,
+            totalPages: Math.ceil(messages.count / limitNum),
         });
     } catch (error) {
         console.error(error);
@@ -37,9 +38,10 @@ const getMessages = async (req: Request, res: Response) => {
 const getDirectMessages = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params; // The other user
-        const currentUserId = req.user.id;
-        const { page = 1, limit = 50 } = req.query;
-        const offset = (page - 1) * limit;
+        const currentUserId = req.user?.userId;
+        const pageNum = Number(req.query.page) || 1;
+        const limitNum = Number(req.query.limit) || 50;
+        const offset = (pageNum - 1) * limitNum;
 
         const messages = await Message.findAndCountAll({
             where: {
@@ -55,15 +57,15 @@ const getDirectMessages = async (req: Request, res: Response) => {
                 },
             ],
             order: [['createdAt', 'DESC']],
-            limit: parseInt(limit),
-            offset: parseInt(offset),
+            limit: limitNum,
+            offset,
         });
 
         res.json({
             messages: messages.rows.reverse(),
             total: messages.count,
-            page: parseInt(page),
-            totalPages: Math.ceil(messages.count / limit),
+            page: pageNum,
+            totalPages: Math.ceil(messages.count / limitNum),
         });
     } catch (error) {
         console.error(error);

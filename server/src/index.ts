@@ -47,7 +47,7 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({ success: true, status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.use(morgan(process.env.NODE_ENV === "producation" ? "combined" : "dev"));
+app.use(morgan(process.env.NODE_ENV === "prod" ? "combined" : "dev"));
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {

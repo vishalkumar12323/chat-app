@@ -13,15 +13,26 @@ export interface Channel {
   description: string;
 }
 
-export interface Message {
+export interface ChannelMessage {
   id: number;
   content: string;
-  channel_id?: number;
-  user_id: number;
-  recipient_id?: number;
+  sender_id: number;
+  channel_id: number;
   createdAt: string;
-  user?: Pick<User, 'username'>;
+  Sender?: Pick<User, 'id' | 'username'>;
 }
+
+export interface DirectMessage {
+  id: number;
+  content: string;
+  sender_id: number;
+  recipient_id: number;
+  createdAt: string;
+  Sender?: Pick<User, 'id' | 'username'>;
+  Recipient?: Pick<User, 'id' | 'username'>;
+}
+
+export type Message = ChannelMessage | DirectMessage;
 
 // ─── Store State Types ───────────────────────────────────────────────────────
 

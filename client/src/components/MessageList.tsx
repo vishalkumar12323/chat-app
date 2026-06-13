@@ -86,11 +86,11 @@ const MessageList: React.FC = () => {
                 {messages.map((msg) => (
                     <div key={msg.id} className="flex items-start">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3 shrink-0">
-                            {msg.user?.username?.charAt(0).toUpperCase()}
+                            {msg.Sender?.username?.charAt(0).toUpperCase()}
                         </div>
                         <div>
                             <div className="flex items-baseline">
-                                <span className="font-bold mr-2">{msg.user?.username}</span>
+                                <span className="font-bold mr-2">{msg.Sender?.username}</span>
                                 <span className="text-xs text-gray-500">
                                     {format(new Date(msg.createdAt), 'h:mm a')}
                                 </span>

@@ -1,4 +1,4 @@
-import { User, Message } from "../models";
+import { User, ChannelMessage, DirectMessage } from "../models";
 import { verifyToken } from "../utils/jwt"
 import { type Server } from "socket.io";
 import * as dotenv from "dotenv";
@@ -42,15 +42,15 @@ const socketHandler = (io: Server) => {
       try {
         const { channelId, content } = data;
 
-        const message = await Message.create({
+        const message = await ChannelMessage.create({
           content,
-          user_id: socket.user?.get().id as string,
+          sender_id: socket.user?.get().id as string,
           channel_id: channelId,
         });
 
-        const fullMessage = await Message.findByPk(message.get().id, {
+        const fullMessage = await ChannelMessage.findByPk(message.get().id, {
           include: [
-            { model: User, attributes: ["id", "username", "avatar_url"] },
+            { model: User, as: "Sender", attributes: ["id", "username", "avatar_url"] },
           ],
         });
 
@@ -65,15 +65,15 @@ const socketHandler = (io: Server) => {
       try {
         const { recipientId, content } = data;
 
-        const message = await Message.create({
+        const message = await DirectMessage.create({
           content,
-          user_id: socket.user?.get().id as string,
+          sender_id: socket.user?.get().id as string,
           recipient_id: recipientId,
         });
 
-        const fullMessage = await Message.findByPk(message.get().id, {
+        const fullMessage = await DirectMessage.findByPk(message.get().id, {
           include: [
-            { model: User, attributes: ["id", "username", "avatar_url"] },
+            { model: User, as: "Sender", attributes: ["id", "username", "avatar_url"] },
             {
               model: User,
               as: "Recipient",

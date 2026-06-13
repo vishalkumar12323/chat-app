@@ -1,4 +1,4 @@
-import { Message, User } from '../models';
+import { ChannelMessage, DirectMessage, User } from '../models';
 import { Request, Response } from "express"
 
 import { Op } from 'sequelize';
@@ -10,11 +10,12 @@ const getMessages = async (req: Request, res: Response) => {
         const limitNum = Number(req.query.limit) || 50;
         const offset = (pageNum - 1) * limitNum;
 
-        const messages = await Message.findAndCountAll({
+        const messages = await ChannelMessage.findAndCountAll({
             where: { channel_id: channelId },
             include: [
                 {
                     model: User,
+                    as: 'Sender',
                     attributes: ['id', 'username', 'avatar_url'],
                 },
             ],
@@ -43,16 +44,22 @@ const getDirectMessages = async (req: Request, res: Response) => {
         const limitNum = Number(req.query.limit) || 50;
         const offset = (pageNum - 1) * limitNum;
 
-        const messages = await Message.findAndCountAll({
+        const messages = await DirectMessage.findAndCountAll({
             where: {
                 [Op.or]: [
-                    { user_id: currentUserId, recipient_id: userId },
-                    { user_id: userId, recipient_id: currentUserId },
+                    { sender_id: currentUserId, recipient_id: userId },
+                    { sender_id: userId, recipient_id: currentUserId },
                 ],
             },
             include: [
                 {
                     model: User,
+                    as: 'Sender',
+                    attributes: ['id', 'username', 'avatar_url'],
+                },
+                {
+                    model: User,
+                    as: 'Recipient',
                     attributes: ['id', 'username', 'avatar_url'],
                 },
             ],

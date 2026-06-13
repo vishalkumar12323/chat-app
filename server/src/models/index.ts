@@ -1,19 +1,24 @@
 import User from './User';
 import Channel from './Channel';
-import Message from './Message';
+import DirectMessage from './DirectMessage';
+import ChannelMessage from './ChannelMessage';
 import ChannelMember from './ChannelMember';
 
-// User - Message
-User.hasMany(Message, { foreignKey: 'user_id' });
-Message.belongsTo(User, { foreignKey: 'user_id' });
+// User - DirectMessage (Sender)
+User.hasMany(DirectMessage, { foreignKey: 'sender_id', as: 'SentDirectMessages' });
+DirectMessage.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender' });
 
-// Channel - Message
-Channel.hasMany(Message, { foreignKey: 'channel_id' });
-Message.belongsTo(Channel, { foreignKey: 'channel_id' });
+// User - DirectMessage (Recipient)
+User.hasMany(DirectMessage, { foreignKey: 'recipient_id', as: 'ReceivedDirectMessages' });
+DirectMessage.belongsTo(User, { foreignKey: 'recipient_id', as: 'Recipient' });
 
-// User - Message
-User.hasMany(Message, { foreignKey: 'recipient_id', as: 'ReceivedMessages' });
-Message.belongsTo(User, { foreignKey: 'recipient_id', as: 'Recipient' });
+// User - ChannelMessage (Sender)
+User.hasMany(ChannelMessage, { foreignKey: 'sender_id', as: 'SentChannelMessages' });
+ChannelMessage.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender' });
+
+// Channel - ChannelMessage
+Channel.hasMany(ChannelMessage, { foreignKey: 'channel_id' });
+ChannelMessage.belongsTo(Channel, { foreignKey: 'channel_id' });
 
 // User - Channel (Many-to-Many via ChannelMember)
 User.belongsToMany(Channel, { through: ChannelMember, foreignKey: 'user_id' });
@@ -25,6 +30,7 @@ Channel.belongsTo(User, { as: 'Creator', foreignKey: 'created_by' });
 export {
     User,
     Channel,
-    Message,
+    DirectMessage,
+    ChannelMessage,
     ChannelMember,
 };

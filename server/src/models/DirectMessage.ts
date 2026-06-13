@@ -1,17 +1,16 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-export interface MessageAttributes {
+export interface DirectMessageAttributes {
     id: string;
     content: string;
-    user_id: string;
-    channel_id?: string;
-    recipient_id?: string;
+    sender_id: string;
+    recipient_id: string;
 }
 
-interface MessageCreationAttributes extends Optional<MessageAttributes, 'id' | 'channel_id' | 'recipient_id'> {}
+interface DirectMessageCreationAttributes extends Optional<DirectMessageAttributes, 'id'> {}
 
-const Message = sequelize.define<Model<MessageAttributes, MessageCreationAttributes>>('messages', {
+const DirectMessage = sequelize.define<Model<DirectMessageAttributes, DirectMessageCreationAttributes>>('direct_messages', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -21,21 +20,16 @@ const Message = sequelize.define<Model<MessageAttributes, MessageCreationAttribu
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    user_id: {
+    sender_id: {
         type: DataTypes.UUID,
         allowNull: false,
     },
-    channel_id: {
-        type: DataTypes.UUID,
-        allowNull: true,
-    },
     recipient_id: {
         type: DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
     },
 }, {
     timestamps: true,
 });
 
-export default Message;
-
+export default DirectMessage;

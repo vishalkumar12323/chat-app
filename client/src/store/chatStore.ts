@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api from "../services/api";
 import { io, Socket } from "socket.io-client";
-import type { ChatState, Channel, User, Message } from "../types";
+import type { ChatState, Channel, User, Message, ChannelMessage, DirectMessage } from "../types";
 
 const useChatStore = create<ChatState>((set, get) => ({
   socket: null,
@@ -25,20 +25,20 @@ const useChatStore = create<ChatState>((set, get) => ({
       console.log("Socket connected");
     });
 
-    socket.on("new_message", (message: Message) => {
+    socket.on("new_message", (message: ChannelMessage) => {
       const { currentChannel, messages } = get();
       if (currentChannel && message.channel_id === currentChannel.id) {
         set({ messages: [...messages, message] });
       }
     });
 
-    socket.on("new_direct_message", (message: Message) => {
+    socket.on("new_direct_message", (message: DirectMessage) => {
       const { selectedUser, messages } = get();
       // Check if the message belongs to the currently selected conversation
       // Either sent by the selected user OR sent by me TO the selected user
       const isRelevant =
         selectedUser &&
-        (message.user_id === selectedUser.id ||
+        (message.sender_id === selectedUser.id ||
           message.recipient_id === selectedUser.id);
 
       if (isRelevant) {

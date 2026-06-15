@@ -1,15 +1,57 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import type { FormEvent, ChangeEvent } from 'react';
 import useChatStore from '../store/chatStore';
 import { Send } from 'lucide-react';
 
 const MessageInput: React.FC = () => {
     const [content, setContent] = useState<string>('');
-    const { sendMessage, currentChannel, selectedUser } = useChatStore();
+    const { sendMessage, currentChannel, selectedUser, emitTyping } = useChatStore();
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
+        setContent(e.target.value);
+
+        if (e.target.value.trim()) {
+            // Emit typing: true immediately
+            emitTyping(true);
+
+            // Reset the 2-second debounce timer
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            typingTimeoutRef.current = setTimeout(() => {
+                emitTyping(false);
+                typingTimeoutRef.current = null;
+            }, 2000);
+        } else {
+            // Input cleared — stop typing
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = null;
+            }
+            emitTyping(false);
+        }
+    };
 
     const handleSend = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         if (!content.trim() || (!currentChannel && !selectedUser)) return;
+
+        // Stop typing immediately on send
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+            typingTimeoutRef.current = null;
+        }
+        emitTyping(false);
 
         sendMessage(content);
         setContent('');
@@ -30,7 +72,7 @@ const MessageInput: React.FC = () => {
                     className="flex-1 bg-transparent outline-none"
                     placeholder={placeholder}
                     value={content}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setContent(e.target.value)}
+                    onChange={handleChange}
                     disabled={isDisabled}
                 />
                 <button

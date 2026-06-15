@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import api from "../services/api";
 import { io, Socket } from "socket.io-client";
-import type { ChatState, Channel, User, Message, ChannelMessage, DirectMessage } from "../types";
+import type { ChatState, Channel, User, Message, ChannelMessage, DirectMessage, TypingUser } from "../types";
+
+// Safety timeout map to auto-clear stale typing indicators
+const typingTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
 
 const useChatStore = create<ChatState>((set, get) => ({
   socket: null,
@@ -11,6 +14,7 @@ const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   users: [],
   onlineUsers: new Set<number>(),
+  typingUsers: [],
   isLoading: false,
   hasMoreMessages: true,
   page: 1,
@@ -58,6 +62,54 @@ const useChatStore = create<ChatState>((set, get) => ({
       });
     });
 
+    socket.on("user_typing", ({ userId, username, isTyping, channelId, recipientId }: {
+      userId: number;
+      username: string;
+      isTyping: boolean;
+      channelId?: number;
+      recipientId?: number;
+    }) => {
+      const { currentChannel, selectedUser } = get();
+
+      // Only show typing if it's relevant to the current view
+      const isRelevant =
+        (channelId && currentChannel && currentChannel.id === channelId) ||
+        (recipientId && selectedUser && selectedUser.id === userId);
+
+      if (!isRelevant) return;
+
+      if (isTyping) {
+        set((state) => {
+          const alreadyTyping = state.typingUsers.some((u) => u.userId === userId);
+          if (alreadyTyping) return state;
+          return { typingUsers: [...state.typingUsers, { userId, username }] };
+        });
+
+        // Safety timeout: auto-remove after 3 seconds
+        if (typingTimeouts.has(userId)) {
+          clearTimeout(typingTimeouts.get(userId)!);
+        }
+        typingTimeouts.set(
+          userId,
+          setTimeout(() => {
+            set((state) => ({
+              typingUsers: state.typingUsers.filter((u) => u.userId !== userId),
+            }));
+            typingTimeouts.delete(userId);
+          }, 3000)
+        );
+      } else {
+        // Remove typing user
+        if (typingTimeouts.has(userId)) {
+          clearTimeout(typingTimeouts.get(userId)!);
+          typingTimeouts.delete(userId);
+        }
+        set((state) => ({
+          typingUsers: state.typingUsers.filter((u) => u.userId !== userId),
+        }));
+      }
+    });
+
     set({ socket });
   },
 
@@ -101,6 +153,7 @@ const useChatStore = create<ChatState>((set, get) => ({
       currentChannel: channel,
       selectedUser: null,
       messages: [],
+      typingUsers: [],
       page: 1,
       hasMoreMessages: true,
     });
@@ -116,6 +169,7 @@ const useChatStore = create<ChatState>((set, get) => ({
       selectedUser: user,
       currentChannel: null,
       messages: [],
+      typingUsers: [],
       page: 1,
       hasMoreMessages: true,
     });
@@ -188,6 +242,17 @@ const useChatStore = create<ChatState>((set, get) => ({
           content,
         });
       }
+    }
+  },
+
+  emitTyping: (isTyping: boolean): void => {
+    const { socket, currentChannel, selectedUser } = get();
+    if (!socket) return;
+
+    if (currentChannel) {
+      socket.emit("typing", { channelId: currentChannel.id, isTyping });
+    } else if (selectedUser) {
+      socket.emit("typing", { recipientId: selectedUser.id, isTyping });
     }
   },
 

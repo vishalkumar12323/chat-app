@@ -34,6 +34,11 @@ export interface DirectMessage {
 
 export type Message = ChannelMessage | DirectMessage;
 
+export interface TypingUser {
+  userId: number;
+  username: string;
+}
+
 // ─── Store State Types ───────────────────────────────────────────────────────
 
 export interface AuthState {
@@ -56,6 +61,7 @@ export interface ChatState {
   messages: Message[];
   users: User[];
   onlineUsers: Set<number>;
+  typingUsers: TypingUser[];
   isLoading: boolean;
   hasMoreMessages: boolean;
   page: number;
@@ -70,5 +76,6 @@ export interface ChatState {
   fetchDirectMessages: (userId: number, page?: number) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
   sendMessage: (content: string) => void;
+  emitTyping: (isTyping: boolean) => void;
   fetchUsers: () => Promise<void>;
 }

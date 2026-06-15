@@ -93,13 +93,25 @@ const socketHandler = (io: Server) => {
 
     // Typing indicator
     socket.on("typing", (data) => {
-      const { channelId, isTyping } = data;
-      socket.to(`channel_${channelId}`).emit("user_typing", {
-        userId: socket.user?.get().id,
-        username: socket.user?.get().username,
-        isTyping,
-        channelId,
-      });
+      const { channelId, recipientId, isTyping } = data;
+
+      if (channelId) {
+        // Channel typing
+        socket.to(`channel_${channelId}`).emit("user_typing", {
+          userId: socket.user?.get().id,
+          username: socket.user?.get().username,
+          isTyping,
+          channelId,
+        });
+      } else if (recipientId) {
+        // DM typing
+        socket.to(`user_${recipientId}`).emit("user_typing", {
+          userId: socket.user?.get().id,
+          username: socket.user?.get().username,
+          isTyping,
+          recipientId,
+        });
+      }
     });
 
     socket.on("disconnect", async () => {

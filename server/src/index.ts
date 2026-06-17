@@ -34,20 +34,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use('/api/auth', authRoutes);
-app.use('/api/channels', channelRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/channels', channelRoutes);
+app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/users', userRoutes);
 
 
 socketHandler(io);
 
 // Test route
-app.get('/api/health', (req, res) => {
+app.get('/api/v1/health', (req, res) => {
     res.status(200).json({ success: true, status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.use(morgan("dev"));
+app.use(morgan(process.env.NODE_ENV === "prod" ? "combined" : "dev"));
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {

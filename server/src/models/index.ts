@@ -3,6 +3,7 @@ import Channel from './Channel';
 import DirectMessage from './DirectMessage';
 import ChannelMessage from './ChannelMessage';
 import ChannelMember from './ChannelMember';
+import File from './File';
 
 // User - DirectMessage (Sender)
 User.hasMany(DirectMessage, { foreignKey: 'sender_id', as: 'SentDirectMessages' });
@@ -27,10 +28,44 @@ Channel.belongsToMany(User, { through: ChannelMember, foreignKey: 'channel_id' }
 // Channel - User (Creator)
 Channel.belongsTo(User, { as: 'Creator', foreignKey: 'created_by' });
 
+// User - File (Sender)
+User.hasMany(File, {
+    foreignKey: "sender_id",
+    as: "SentFiles"
+});
+
+File.belongsTo(User, {
+    foreignKey: "sender_id",
+    as: "Sender"
+});
+
+// User - File (Recipient)
+User.hasMany(File, {
+    foreignKey: "recipient_id",
+    as: "ReceivedFiles"
+});
+
+File.belongsTo(User, {
+    foreignKey: "recipient_id",
+    as: "Recepient"
+});
+
+// Channel - File
+Channel.hasMany(File, {
+    foreignKey: "channel_id",
+    as: "Files"
+});
+
+File.belongsTo(Channel, {
+    foreignKey: "channel_id",
+    as: "Channel"
+});
+
 export {
     User,
     Channel,
     DirectMessage,
     ChannelMessage,
     ChannelMember,
+    File
 };

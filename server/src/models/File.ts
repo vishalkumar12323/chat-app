@@ -6,10 +6,14 @@ export interface FileAttributes {
     sender_id: string;
     recipient_id?: string;
     channel_id?: string;
-    file_name: string;
+    original_name: string;
     file_size: number;
     file_url: string;
-    extension: string;
+    mime_type: string;
+    download_url: string;
+    preview_url: string;
+    bucket_id: string;
+    file_id: string;
 };
 
 interface FileCreationAttributes extends Optional<FileAttributes, 'id' | 'recipient_id' | 'channel_id'> { };
@@ -32,7 +36,7 @@ const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('fi
         type: DataTypes.UUID,
         allowNull: true,
     },
-    file_name: {
+    original_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -44,10 +48,26 @@ const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('fi
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    extension: {
+    mime_type: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    download_url: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    preview_url: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    bucket_id: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    file_id: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
 }, {
     timestamps: true
 });

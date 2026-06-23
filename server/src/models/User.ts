@@ -11,7 +11,7 @@ export interface UserAttributes {
     last_seen?: Date;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'avatar_url' | 'is_online' | 'last_seen'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'avatar_url' | 'is_online' | 'last_seen'> { }
 
 const User = sequelize.define<Model<UserAttributes, UserCreationAttributes>>('users', {
     id: {

@@ -13,6 +13,9 @@ DirectMessage.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender' });
 User.hasMany(DirectMessage, { foreignKey: 'recipient_id', as: 'ReceivedDirectMessages' });
 DirectMessage.belongsTo(User, { foreignKey: 'recipient_id', as: 'Recipient' });
 
+DirectMessage.hasMany(File, { foreignKey: "file_id", as: "MessageFileId" });
+File.belongsTo(DirectMessage, { foreignKey: "file_id", as: "FileId" });
+
 // User - ChannelMessage (Sender)
 User.hasMany(ChannelMessage, { foreignKey: 'sender_id', as: 'SentChannelMessages' });
 ChannelMessage.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender' });

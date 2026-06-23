@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS direct_messages (
     content VARCHAR(255) NOT NULL,
     sender_id UUID NOT NULL,
     recipient_id UUID NOT NULL,
+    file_id VARCHAR(100)
     "createdAt" TIMESTAMP NOT NULL CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL CURRENT_TIMESTAMP,
 
@@ -50,6 +51,11 @@ CREATE TABLE IF NOT EXISTS direct_messages (
 
     CONSTRAINT fk_dm_recipient
         FOREIGN KEY (recipient_id) REFERENCES users(id),
+        ON DELETE CASCADE
+
+    CONSTRAINT fk_file_id
+        FOREIGN KEY (file_id)
+        REFERENCES files(file_id)
         ON DELETE CASCADE
 );
 
@@ -101,10 +107,14 @@ CREATE TABLE IF NOT EXISTS files (
     sender_id UUID NOT NULL,
     recipient_id UUID,
     channel_id UUID,
-    file_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     file_url TEXT NOT NULL,
-    extension VARCHAR(50) NOT NULL,
+    mime_type VARCHAR(50) NOT NULL,
+    download_url VARCHAR(500) NOT NULL,
+    preview_url VARCHAR(500) NOT NULL,
+    bucket_id VARCHAR(50) NOT NULL,
+    file_id VARCHAR(50) not NULL
 
     "createdAt" TIMESTAMP NOT NULL CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL CURRENT_TIMESTAMP,

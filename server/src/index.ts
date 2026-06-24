@@ -14,6 +14,7 @@ import authRoutes from './routes/authRoutes';
 import channelRoutes from './routes/channelRoutes';
 import messageRoutes from './routes/messageRoutes';
 import userRoutes from './routes/userRoutes';
+import fileRoutes from "./routes/fileRoutes";
 import socketHandler from './socket/socket';
 
 const app = express();
@@ -38,6 +39,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/channels', channelRoutes);
 app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/files', fileRoutes);
 
 
 socketHandler(io);

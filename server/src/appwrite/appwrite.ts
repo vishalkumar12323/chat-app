@@ -1,11 +1,11 @@
-import "dotenv/config"
 import { Client, Storage } from "node-appwrite";
+import { env } from "../config/env"
 
 
 const client = new Client()
-    .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-    .setProject(process.env.APPWRITE_PROJECT_ID!)
-    .setKey(process.env.APPWRITE_API_KEY!);
+    .setEndpoint(env.appwrite_endpoint)
+    .setProject(env.appwrite_project_id)
+    .setKey(env.appwrite_api_key);
 
 const storage = new Storage(client);
 

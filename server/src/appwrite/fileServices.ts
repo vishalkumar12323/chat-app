@@ -1,16 +1,14 @@
 import { InputFile } from "node-appwrite/dist/inputFile";
 import { ID } from "node-appwrite";
 import { storage } from "./appwrite"
+import { env } from "../config/env";
 
-const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
-const PROJECT_ID = process.env.APPWRITE_PROJECT_ID!;
-const ENDPOINT = process.env.APPWRITE_ENDPOINT!;
 
 export const uploadFileToAppwriteStorage = async (file: Buffer, fileName: string) => {
     const appwriteFile = InputFile.fromBuffer(file, fileName);
 
     const response = await storage.createFile({
-        bucketId: BUCKET_ID,
+        bucketId: env.appwrite_bucket_id,
         file: appwriteFile,
         fileId: ID.unique(),
     });
@@ -26,21 +24,21 @@ export const uploadFileToAppwriteStorage = async (file: Buffer, fileName: string
 
 export const getFileFromAppwriteStorage = async (fileId: string) => {
     return await storage.getFile({
-        bucketId: BUCKET_ID,
+        bucketId: env.appwrite_bucket_id,
         fileId: fileId
     });
 };
 
 export const getFileDownloadLink = (bucketId: string, fileId: string) => {
-    return `${ENDPOINT}/storage/buckets/${bucketId}/files/${fileId}/download?project=${PROJECT_ID}`;
+    return `${env.appwrite_endpoint}/storage/buckets/${bucketId}/files/${fileId}/download?project=${env.appwrite_project_id}`;
 };
 
 export const getFilePreviewLink = (bucketId: string, fileId: string) => {
-    return `${ENDPOINT}/storage/buckets/${bucketId}/files/${fileId}/preview`;
+    return `${env.appwrite_endpoint}/storage/buckets/${bucketId}/files/${fileId}/preview`;
 };
 
 
 export const deleteFileFromAppwriteStorage = async (fileId: string) => {
-    return await storage.deleteFile({ bucketId: BUCKET_ID, fileId: fileId });
+    return await storage.deleteFile({ bucketId: env.appwrite_bucket_id, fileId: fileId });
 }
 

@@ -3,10 +3,9 @@ import http from "node:http"
 import cors from 'cors';
 import { Server } from 'socket.io';
 import sequelize from './config/database';
-import * as dotenv from "dotenv";
-import morgan from "morgan"
+import morgan from "morgan";
+import { env } from './config/env';
 
-dotenv.config();
 
 
 
@@ -21,13 +20,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.ALLOWED_ORIGIN,
+        origin: env.allowed_origin,
         methods: ["GET", "POST"]
     }
 });
 
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGIN,
+    origin: env.allowed_origin,
     methods: "*",
     credentials: true,
 }));
@@ -49,8 +48,8 @@ app.get('/api/v1/health', (req, res) => {
     res.status(200).json({ success: true, status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.use(morgan(process.env.NODE_ENV === "prod" ? "combined" : "dev"));
-const PORT = process.env.PORT || 5000;
+app.use(morgan(env.node_env === "prod" ? "combined" : "dev"));
+const PORT = env.port || 5000;
 
 async function startServer() {
     try {

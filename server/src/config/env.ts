@@ -13,5 +13,7 @@ export const env = {
     appwrite_project_name: process.env.APPWRITE_PROJECT_NAME!,
     appwrite_endpoint: process.env.APPWRITE_ENDPOINT!,
     appwrite_api_key: process.env.APPWRITE_API_KEY!,
-    appwrite_bucket_name: process.env.APPWRITE_BUCKET_ID!
+    appwrite_bucket_id: process.env.APPWRITE_BUCKET_ID!,
+    port: process.env.PORT!,
+    node_env: process.env.NODE_ENV!
 };

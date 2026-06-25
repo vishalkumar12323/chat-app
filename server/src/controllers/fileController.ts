@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { File } from "../models";
+import { File, User } from "../models";
 import { upload } from "../multer/config";
 import multer from "multer";
-import { uploadFileToAppwriteStorage, deleteFileFromAppwriteStorage, getFileDownloadLink, getFileFromAppwriteStorage } from "../appwrite/fileServices"
+import { uploadFileToAppwriteStorage, deleteFileFromAppwriteStorage, getFileDownloadLink, getFilePreviewLink } from "../appwrite/fileServices"
 
 
 export const uploadFile = async (req: Request, res: Response) => {
@@ -29,9 +29,8 @@ export const uploadFile = async (req: Request, res: Response) => {
                 mime_type: result.mimeType,
                 original_name: result.fileName,
                 file_size: result.fileSize,
-                download_url: "",
-                file_url: "",
-                preview_url: "",
+                download_url: getFileDownloadLink(result.bucketId, result.fileId),
+                preview_url: getFilePreviewLink(result.bucketId, result.fileId),
             });
 
             res.status(201).json({ message: "file successfully uploaded." });
@@ -48,14 +47,24 @@ export const uploadFile = async (req: Request, res: Response) => {
 
 
 export const getFileById = async (req: Request, res: Response) => {
-
-};
-
-
-export const downloadFile = async (req: Request, res: Response) => {
-
+    const fileId = req.params.id || req.params.id[0];
+    try {
+        const fileMetaData = await File.findOne({ where: { id: fileId } });
+        res.json(fileMetaData?.toJSON());
+    } catch (error) {
+        console.log("Error Fetching File By ID:: ", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 };
 
 export const deleteFile = async (req: Request, res: Response) => {
-
+    const fileId = req.params.id || req.params.id[0];
+    try {
+        await deleteFileFromAppwriteStorage(fileId as string);
+        await File.destroy({ where: { file_id: fileId } });
+        res.status(204).json({ message: "File deleted successfull." });
+    } catch (error) {
+        console.log("Error Deleting File By ID:: ", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 };

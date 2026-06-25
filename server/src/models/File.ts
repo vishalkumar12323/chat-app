@@ -8,7 +8,6 @@ export interface FileAttributes {
     channel_id?: string;
     original_name: string;
     file_size: number;
-    file_url: string;
     mime_type: string;
     download_url: string;
     preview_url: string;
@@ -42,10 +41,6 @@ const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('fi
     },
     file_size: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-    },
-    file_url: {
-        type: DataTypes.TEXT,
         allowNull: false,
     },
     mime_type: {

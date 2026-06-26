@@ -1,4 +1,4 @@
-import { ChannelMessage, DirectMessage, User } from '../models';
+import { ChannelMessage, DirectMessage, User, File } from '../models';
 import { Request, Response } from "express"
 
 import { Op } from 'sequelize';
@@ -17,6 +17,11 @@ const getMessages = async (req: Request, res: Response) => {
                     model: User,
                     as: 'Sender',
                     attributes: ['id', 'username', 'avatar_url'],
+                },
+                {
+                    model: File,
+                    as: 'File',
+                    attributes: ['id', 'original_name', 'file_size', 'mime_type', 'download_url', 'preview_url'],
                 },
             ],
             order: [['createdAt', 'DESC']],
@@ -61,6 +66,11 @@ const getDirectMessages = async (req: Request, res: Response) => {
                     model: User,
                     as: 'Recipient',
                     attributes: ['id', 'username', 'avatar_url'],
+                },
+                {
+                    model: File,
+                    as: 'File',
+                    attributes: ['id', 'original_name', 'file_size', 'mime_type', 'download_url', 'preview_url'],
                 },
             ],
             order: [['createdAt', 'DESC']],

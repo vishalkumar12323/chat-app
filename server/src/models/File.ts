@@ -3,19 +3,17 @@ import sequelize from "../config/database";
 
 export interface FileAttributes {
     id: string;
-    sender_id: string;
-    recipient_id?: string;
-    channel_id?: string;
+    uploaded_by: string;
     original_name: string;
     file_size: number;
     mime_type: string;
     download_url: string;
     preview_url: string;
     bucket_id: string;
-    file_id: string;
+    file_id: string; // Appwrite file ID
 };
 
-interface FileCreationAttributes extends Optional<FileAttributes, 'id' | 'recipient_id' | 'channel_id'> { };
+interface FileCreationAttributes extends Optional<FileAttributes, 'id'> { };
 
 const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('files', {
     id: {
@@ -23,17 +21,9 @@ const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('fi
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    sender_id: {
+    uploaded_by: {
         type: DataTypes.UUID,
         allowNull: false,
-    },
-    recipient_id: {
-        type: DataTypes.UUID,
-        allowNull: true,
-    },
-    channel_id: {
-        type: DataTypes.UUID,
-        allowNull: true,
     },
     original_name: {
         type: DataTypes.STRING,
@@ -44,24 +34,24 @@ const File = sequelize.define<Model<FileAttributes, FileCreationAttributes>>('fi
         allowNull: false,
     },
     mime_type: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: false,
     },
     download_url: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
     },
     preview_url: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.TEXT,
+        allowNull: false,
     },
     bucket_id: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.STRING(50),
+        allowNull: false,
     },
     file_id: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.STRING(50),
+        allowNull: false,
     }
 }, {
     timestamps: true

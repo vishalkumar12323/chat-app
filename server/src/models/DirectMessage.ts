@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+export type MessageType = 'TEXT' | 'IMAGE' | 'DOCUMENT';
 export interface DirectMessageAttributes {
     id: string;
     type: MessageType;
@@ -20,7 +20,7 @@ const DirectMessage = sequelize.define<Model<DirectMessageAttributes, DirectMess
         primaryKey: true,
     },
     type: {
-        type: DataTypes.ENUM('TEXT', 'IMAGE', 'VIDEO', 'DOCUMENT'),
+        type: DataTypes.ENUM('TEXT', 'IMAGE', 'DOCUMENT'),
         allowNull: false,
         defaultValue: 'TEXT',
     },
@@ -37,8 +37,12 @@ const DirectMessage = sequelize.define<Model<DirectMessageAttributes, DirectMess
         allowNull: false,
     },
     file_id: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'files',
+            key: 'id',
+        },
     }
 }, {
     timestamps: true,

@@ -1,4 +1,4 @@
-import { User, ChannelMessage, DirectMessage } from "../models";
+import { User, ChannelMessage, DirectMessage, File } from "../models";
 import { verifyToken } from "../utils/jwt"
 import { type Server } from "socket.io";
 import * as dotenv from "dotenv";
@@ -22,8 +22,6 @@ const socketHandler = (io: Server) => {
   });
 
   io.on("connection", async (socket) => {
-    // console.log(`User connected: ${socket.user?.username}`);
-
     // Update user status to online
     await socket.user?.update({ is_online: true, last_seen: new Date() });
     io.emit("user_status", { userId: socket.user?.get().id, is_online: true });
@@ -34,23 +32,25 @@ const socketHandler = (io: Server) => {
     // Join channels
     socket.on("join_channel", (channelId) => {
       socket.join(`channel_${channelId}`);
-      // console.log(`User ${socket.user?.username} joined channel ${channelId}`);
     });
 
     // Send message (Channel)
     socket.on("send_message", async (data) => {
       try {
-        const { channelId, content } = data;
+        const { channelId, content, fileId, type } = data;
 
         const message = await ChannelMessage.create({
-          content,
+          content: content || null,
+          type: type || 'TEXT',
           sender_id: socket.user?.get().id as string,
           channel_id: channelId,
+          file_id: fileId || null,
         });
 
         const fullMessage = await ChannelMessage.findByPk(message.get().id, {
           include: [
             { model: User, as: "Sender", attributes: ["id", "username", "avatar_url"] },
+            { model: File, as: "File", attributes: ["id", "original_name", "file_size", "mime_type", "download_url", "preview_url"] },
           ],
         });
 
@@ -63,12 +63,14 @@ const socketHandler = (io: Server) => {
     // Send Direct Message
     socket.on("send_direct_message", async (data) => {
       try {
-        const { recipientId, content } = data;
+        const { recipientId, content, fileId, type } = data;
 
         const message = await DirectMessage.create({
-          content,
+          content: content || null,
+          type: type || 'TEXT',
           sender_id: socket.user?.get().id as string,
           recipient_id: recipientId,
+          file_id: fileId || null,
         });
 
         const fullMessage = await DirectMessage.findByPk(message.get().id, {
@@ -79,12 +81,13 @@ const socketHandler = (io: Server) => {
               as: "Recipient",
               attributes: ["id", "username", "avatar_url"],
             },
+            { model: File, as: "File", attributes: ["id", "original_name", "file_size", "mime_type", "download_url", "preview_url"] },
           ],
         });
 
         // Emit to recipient
         io.to(`user_${recipientId}`).emit("new_direct_message", fullMessage);
-        // Emit to sender (so it appears in their chat immediately if they have multiple tabs open, or just consistency)
+        // Emit to sender
         io.to(`user_${socket.user?.get().id}`).emit("new_direct_message", fullMessage);
       } catch (error) {
         console.error("Error sending direct message:", error);
@@ -115,7 +118,6 @@ const socketHandler = (io: Server) => {
     });
 
     socket.on("disconnect", async () => {
-      // console.log(`User disconnected: ${socket.user.username}`);
       await socket.user?.update({ is_online: false, last_seen: new Date() });
       io.emit("user_status", {
         userId: socket.user?.get().id,

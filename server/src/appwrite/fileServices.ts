@@ -1,4 +1,4 @@
-import { InputFile } from "node-appwrite/dist/inputFile";
+import { InputFile } from "node-appwrite/file";
 import { ID } from "node-appwrite";
 import { storage } from "./appwrite"
 import { env } from "../config/env";

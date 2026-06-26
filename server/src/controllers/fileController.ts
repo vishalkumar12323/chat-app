@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { File, User } from "../models";
+import { File } from "../models";
 import { upload } from "../multer/config";
 import multer from "multer";
 import { uploadFileToAppwriteStorage, deleteFileFromAppwriteStorage, getFileDownloadLink, getFilePreviewLink } from "../appwrite/fileServices"
@@ -22,8 +22,9 @@ export const uploadFile = async (req: Request, res: Response) => {
 
         try {
             const result = await uploadFileToAppwriteStorage(req.file.buffer, req.file.originalname);
-            await File.create({
-                sender_id: req.user?.userId as string,
+
+            const fileRecord = await File.create({
+                uploaded_by: req.user?.userId as string,
                 bucket_id: result.bucketId,
                 file_id: result.fileId,
                 mime_type: result.mimeType,
@@ -33,13 +34,13 @@ export const uploadFile = async (req: Request, res: Response) => {
                 preview_url: getFilePreviewLink(result.bucketId, result.fileId),
             });
 
-            res.status(201).json({ message: "file successfully uploaded." });
+            // Return the full file record so the client can attach it to a message
+            res.status(201).json(fileRecord.toJSON());
         } catch (appwriteError) {
             console.error('Appwrite Upload Error:', appwriteError);
             return res.status(500).json({
-                error: 'Failed to upload file to storage network.',
-                // @ts-ignore
-                details: appwriteError?.message
+                error: 'Failed to upload file to storage.',
+                details: (appwriteError as Error)?.message
             });
         }
     });
@@ -47,24 +48,34 @@ export const uploadFile = async (req: Request, res: Response) => {
 
 
 export const getFileById = async (req: Request, res: Response) => {
-    const fileId = req.params.id || req.params.id[0];
+    const fileId = req.params.id as string;
     try {
-        const fileMetaData = await File.findOne({ where: { id: fileId } });
-        res.json(fileMetaData?.toJSON());
+        const fileMetaData = await File.findByPk(fileId);
+        if (!fileMetaData) {
+            return res.status(404).json({ message: "File not found" });
+        }
+        res.json(fileMetaData.toJSON());
     } catch (error) {
-        console.log("Error Fetching File By ID:: ", error);
+        console.error("Error Fetching File By ID:: ", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
 export const deleteFile = async (req: Request, res: Response) => {
-    const fileId = req.params.id || req.params.id[0];
+    const fileId = req.params.id as string;
     try {
-        await deleteFileFromAppwriteStorage(fileId as string);
-        await File.destroy({ where: { file_id: fileId } });
-        res.status(204).json({ message: "File deleted successfull." });
+        const fileRecord = await File.findByPk(fileId);
+        if (!fileRecord) {
+            return res.status(404).json({ message: "File not found" });
+        }
+
+        const fileData = fileRecord.toJSON() as any;
+        // Delete from Appwrite using the Appwrite file_id, not the DB record id
+        await deleteFileFromAppwriteStorage(fileData.file_id);
+        await fileRecord.destroy();
+        res.status(204).send();
     } catch (error) {
-        console.log("Error Deleting File By ID:: ", error);
+        console.error("Error Deleting File:: ", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

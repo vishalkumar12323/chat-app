@@ -13,20 +13,37 @@ export interface Channel {
   description: string;
 }
 
+export type MessageType = 'TEXT' | 'IMAGE' | 'DOCUMENT';
+
+export interface FileAttachment {
+  id: string;
+  original_name: string;
+  file_size: number;
+  mime_type: string;
+  download_url: string;
+  preview_url: string;
+}
+
 export interface ChannelMessage {
   id: number;
+  type: MessageType;
   content: string;
   sender_id: number;
   channel_id: number;
+  file_id?: string;
+  File?: FileAttachment | null;
   createdAt: string;
   Sender?: Pick<User, 'id' | 'username'>;
 }
 
 export interface DirectMessage {
   id: number;
+  type: MessageType;
   content: string;
   sender_id: number;
   recipient_id: number;
+  file_id?: string;
+  File?: FileAttachment | null;
   createdAt: string;
   Sender?: Pick<User, 'id' | 'username'>;
   Recipient?: Pick<User, 'id' | 'username'>;
@@ -65,6 +82,7 @@ export interface ChatState {
   isLoading: boolean;
   hasMoreMessages: boolean;
   page: number;
+  isUploading: boolean;
   connectSocket: (token: string) => void;
   disconnectSocket: () => void;
   fetchChannels: () => Promise<void>;
@@ -76,6 +94,7 @@ export interface ChatState {
   fetchDirectMessages: (userId: number, page?: number) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
   sendMessage: (content: string) => void;
+  sendFileMessage: (file: globalThis.File, caption?: string) => Promise<void>;
   emitTyping: (isTyping: boolean) => void;
   fetchUsers: () => Promise<void>;
 }

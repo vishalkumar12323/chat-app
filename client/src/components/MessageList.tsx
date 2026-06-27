@@ -2,6 +2,58 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { UIEvent } from 'react';
 import useChatStore from '../store/chatStore';
 import { format } from 'date-fns';
+import { FileText, Download } from 'lucide-react';
+import type { Message, FileAttachment } from '../types';
+
+const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const FileRenderer: React.FC<{ file: FileAttachment; type: string }> = ({ file, type }) => {
+    if (type === 'IMAGE') {
+        return (
+            <div className="mt-2 max-w-sm">
+                <a
+                    href={file.download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                >
+                    <img
+                        src={file.preview_url}
+                        alt={file.original_name}
+                        className="rounded-lg border border-gray-200 max-h-72 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                        loading="lazy"
+                    />
+                </a>
+                <p className="text-xs text-gray-400 mt-1">{file.original_name}</p>
+            </div>
+        );
+    }
+
+    // DOCUMENT (PDF)
+    return (
+        <div className="mt-2 max-w-xs">
+            <a
+                href={file.download_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors group"
+            >
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                    <FileText size={20} className="text-red-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-700 truncate">{file.original_name}</p>
+                    <p className="text-xs text-gray-400">{formatFileSize(file.file_size)}</p>
+                </div>
+                <Download size={16} className="text-gray-400 group-hover:text-blue-500 transition-colors shrink-0" />
+            </a>
+        </div>
+    );
+};
 
 const MessageList: React.FC = () => {
     const { messages, isLoading, currentChannel, selectedUser, loadMoreMessages, hasMoreMessages } = useChatStore();
@@ -83,19 +135,26 @@ const MessageList: React.FC = () => {
                 {isLoading && messages.length === 0 && <div>Loading messages...</div>}
                 {hasMoreMessages && messages.length > 0 && <div className="text-center text-gray-400 text-xs">Loading older messages...</div>}
 
-                {messages.map((msg) => (
+                {messages.map((msg: Message) => (
                     <div key={msg.id} className="flex items-start">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3 shrink-0">
                             {msg.Sender?.username?.charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="flex-1 min-w-0">
                             <div className="flex items-baseline">
                                 <span className="font-bold mr-2">{msg.Sender?.username}</span>
                                 <span className="text-xs text-gray-500">
                                     {format(new Date(msg.createdAt), 'h:mm a')}
                                 </span>
                             </div>
-                            <p className="text-gray-800">{msg.content}</p>
+                            {/* Text content */}
+                            {msg.content && (
+                                <p className="text-gray-800">{msg.content}</p>
+                            )}
+                            {/* File attachment */}
+                            {msg.File && (
+                                <FileRenderer file={msg.File} type={msg.type || 'DOCUMENT'} />
+                            )}
                         </div>
                     </div>
                 ))}

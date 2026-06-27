@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api from "../services/api";
 import { io, Socket } from "socket.io-client";
-import type { ChatState, Channel, User, Message, ChannelMessage, DirectMessage, TypingUser } from "../types";
+import type { ChatState, Channel, User, Message, ChannelMessage, DirectMessage, FileAttachment, MessageType } from "../types";
 
 // Safety timeout map to auto-clear stale typing indicators
 const typingTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
@@ -18,6 +18,7 @@ const useChatStore = create<ChatState>((set, get) => ({
   isLoading: false,
   hasMoreMessages: true,
   page: 1,
+  isUploading: false,
 
   connectSocket: (token: string): void => {
     if (get().socket) return;
@@ -242,6 +243,52 @@ const useChatStore = create<ChatState>((set, get) => ({
           content,
         });
       }
+    }
+  },
+
+  sendFileMessage: async (file: globalThis.File, caption?: string): Promise<void> => {
+    const { socket, currentChannel, selectedUser } = get();
+    if (!socket || (!currentChannel && !selectedUser)) return;
+
+    set({ isUploading: true });
+    try {
+      // 1. Upload file via REST API
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/files/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const fileData: FileAttachment = response.data;
+
+      // 2. Determine message type from mime type
+      let type: MessageType = 'DOCUMENT';
+      if (fileData.mime_type.startsWith('image/')) {
+        type = 'IMAGE';
+      }
+
+      // 3. Send the message via socket with file reference
+      if (currentChannel) {
+        socket.emit("send_message", {
+          channelId: currentChannel.id,
+          content: caption || null,
+          fileId: fileData.id,
+          type,
+        });
+      } else if (selectedUser) {
+        socket.emit("send_direct_message", {
+          recipientId: selectedUser.id,
+          content: caption || null,
+          fileId: fileData.id,
+          type,
+        });
+      }
+    } catch (error) {
+      console.error("File upload failed:", error);
+      throw error;
+    } finally {
+      set({ isUploading: false });
     }
   },
 

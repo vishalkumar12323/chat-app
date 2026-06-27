@@ -34,7 +34,7 @@ export const getFileDownloadLink = (bucketId: string, fileId: string) => {
 };
 
 export const getFilePreviewLink = (bucketId: string, fileId: string) => {
-    return `${env.appwrite_endpoint}/storage/buckets/${bucketId}/files/${fileId}/preview`;
+    return `${env.appwrite_endpoint}/storage/buckets/${bucketId}/files/${fileId}/view?project=${env.appwrite_project_id}`;
 };
 
 

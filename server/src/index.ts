@@ -43,7 +43,7 @@ app.use('/api/v1/files', fileRoutes);
 
 socketHandler(io);
 
-// Test route
+// API Health check route
 app.get('/api/v1/health', (req, res) => {
     res.status(200).json({ success: true, status: 'OK', timestamp: new Date().toISOString() });
 });

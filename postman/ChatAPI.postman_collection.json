@@ -101,6 +101,31 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "💬 Message API",
+            "item": [
+                {
+                    "name": "Get DirectMessage",
+                    "event": [],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/direct/:userId",
+                        "header": [],
+                        "params": {}
+                    }
+                },
+                {
+                    "name": "Get ChannelMessage",
+                    "event": [],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/:channelId",
+                        "header": [],
+                        "params": {}
+                    }
+                }
+            ]
         }
     ]
 }

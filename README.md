@@ -1,6 +1,6 @@
 # Slack-Lite Chat Application
 
-A real-time chat application inspired by Slack, built with modern web technologies. This full-stack application features user authentication, real-time messaging, channel management, and online presence tracking.
+A real-time chat application inspired by Slack, built with modern web technologies. This full-stack application features user authentication, real-time messaging, channel management, file-sharing(Images, Documents[pdf]), show typing-indicators and online presence tracking.
 
 ## 📖 About
 
@@ -29,6 +29,7 @@ Slack-Lite is a simplified version of Slack that enables teams to communicate in
 - **bcrypt** - Password hashing
 - **dotenv** - Environment variable management
 - **cors** - Cross-origin resource sharing
+- **Appwrite** - Appwrite storage service for file-management
 
 ## ✨ Features
 
@@ -49,6 +50,10 @@ Slack-Lite is a simplified version of Slack that enables teams to communicate in
 - Message timestamps
 - Message history for each channel
 - WebSocket-based real-time updates
+
+### Real-Time FileSharing
+- Send and receive images/documents instantly
+- Optoinal file caption/alt message
 
 ### User Presence
 - Online/offline status indicators
